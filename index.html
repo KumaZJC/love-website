@@ -24,6 +24,35 @@
         header p {
             font-size: 1.5em;
         }
+        .music-player {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .music-player button {
+            background-color: #ff6b81;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .music-player button:hover {
+            background-color: #ff3b61;
+        }
+        .music-player input[type="range"] {
+            width: 150px;
+        }
         .photo-section {
             display: flex;
             flex-wrap: wrap;
@@ -42,36 +71,37 @@
         .photo-section img:hover {
             transform: scale(1.2);
         }
-        #countdown {
+        .cloud-upload {
             text-align: center;
-            font-size: 2em;
-            margin: 40px 0;
-        }
-        .music-player {
+            margin: 40px auto;
             max-width: 500px;
-            margin: 30px auto;
-            padding: 20px;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 20px;
         }
-        .music-player button {
-            background-color: #ff6b81;
-            border: none;
+        .cloud-upload input[type="file"] {
+            margin-top: 10px;
+        }
+        .cloud-upload button {
+            margin-top: 10px;
             padding: 10px 20px;
-            margin: 10px;
-            color: white;
+            border: none;
+            background-color: #ff6b81;
             border-radius: 50px;
+            color: #fff;
             cursor: pointer;
-            font-size: 1.1em;
         }
-        .music-player button:hover {
+        .cloud-upload button:hover {
             background-color: #ff3b61;
         }
-        .music-player p {
-            margin-top: 10px;
-            font-size: 1.2em;
+        .record-list {
+            text-align: center;
+            margin: 30px;
+        }
+        .record-list img {
+            width: 120px;
+            margin: 10px;
+            border-radius: 10px;
         }
         footer {
             text-align: center;
@@ -118,21 +148,17 @@
     </style>
 </head>
 <body>
+<div class="music-player">
+    <button onclick="playMusic()">播放</button>
+    <button onclick="pauseMusic()">暂停</button>
+    <input type="range" id="progressBar" value="0" min="0" max="100" step="1">
+</div>
+<audio id="myAudio" src="jiushiaini.mp3"></audio>
 <canvas id="starCanvas"></canvas>
 <header>
     <h1>亲爱的黄玉佳宝贝</h1>
     <p>遇见你，是我此生最美好的事情。</p>
 </header>
-
-<div class="music-player">
-    <h2>💕 我们的专属背景音乐 💕</h2>
-    <audio id="myAudio" src="jiushiaini.mp3"></audio>
-    <div>
-        <button onclick="playMusic()">▶️ 播放</button>
-        <button onclick="pauseMusic()">⏸ 暂停</button>
-    </div>
-    <p id="currentTime">当前时间：0:00</p>
-</div>
 
 <div class="photo-section">
     <img src="1.jpg" alt="photo1">
@@ -141,7 +167,15 @@
     <img src="4.jpg" alt="photo4">
 </div>
 
-<div id="countdown"></div>
+<div class="cloud-upload">
+    <h2>❤️ 每日记录上传（云端保存）</h2>
+    <input type="file" id="cloudUploadInput">
+    <button onclick="uploadToCloudinary()">上传到云端</button>
+</div>
+
+<div class="record-list" id="recordList">
+    <h3>✨ 每日记录（来自云端） ✨</h3>
+</div>
 
 <footer>未来的每一天，我都想和你一起走过 ❤️</footer>
 
@@ -185,42 +219,27 @@
     }
     draw();
 
-    function updateCountdown() {
-        const targetDate = new Date('2024-12-25T00:00:00');
-        const now = new Date();
-        const diff = targetDate - now;
-
-        if (diff <= 0) {
-            document.getElementById('countdown').innerText = '南通 ✈️ 东京';
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-
-        document.getElementById('countdown').innerText =
-            `距离我们的纪念日还有 ${days} 天 ${hours} 小时 ${minutes} 分 ${seconds} 秒`;
-    }
-
-    setInterval(updateCountdown, 1000);
-
     function playMusic() {
-        document.getElementById('myAudio').play();
+        const audio = document.getElementById('myAudio');
+        audio.play();
     }
 
     function pauseMusic() {
-        document.getElementById('myAudio').pause();
+        const audio = document.getElementById('myAudio');
+        audio.pause();
     }
 
-    setInterval(function() {
-        const audio = document.getElementById('myAudio');
-        const current = audio.currentTime;
-        const minutes = Math.floor(current / 60);
-        const seconds = Math.floor(current % 60).toString().padStart(2, '0');
-        document.getElementById('currentTime').innerText = `播放时间：${minutes}:${seconds}`;
-    }, 1000);
+    const audio = document.getElementById('myAudio');
+    const progressBar = document.getElementById('progressBar');
+
+    audio.addEventListener('timeupdate', () => {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = percent;
+    });
+
+    progressBar.addEventListener('input', () => {
+        audio.currentTime = (progressBar.value / 100) * audio.duration;
+    });
 
     document.addEventListener('click', function(e) {
         const heart = document.createElement('div');
@@ -230,6 +249,47 @@
         document.body.appendChild(heart);
         setTimeout(() => heart.remove(), 1000);
     });
+
+    function uploadToCloudinary() {
+        const file = document.getElementById('cloudUploadInput').files[0];
+        if (!file) {
+            alert('请先选择图片！');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'ml_default');
+
+        fetch('https://api.cloudinary.com/v1_1/dsjtiubwu/image/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const url = data.secure_url;
+            const recordList = document.getElementById('recordList');
+            recordList.innerHTML += `<img src="${url}" alt="每日记录">`;
+        })
+        .catch(err => {
+            console.error(err);
+            alert('上传失败，请重试');
+        });
+    }
+
+    function loadExistingRecords() {
+        fetch('https://res.cloudinary.com/dsjtiubwu/image/list/ml_default.json')
+            .then(response => response.json())
+            .then(data => {
+                const recordList = document.getElementById('recordList');
+                data.resources.forEach(img => {
+                    recordList.innerHTML += `<img src="${img.secure_url}" alt="历史记录">`;
+                });
+            })
+            .catch(err => console.error('加载记录失败', err));
+    }
+
+    loadExistingRecords();
 </script>
 </body>
 </html>
