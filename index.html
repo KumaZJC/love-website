@@ -132,7 +132,7 @@
             padding: 10px;
         }
         .record-list img {
-            width: 120px;
+            width: 150px;
             margin: 10px;
             border-radius: 10px;
         }
@@ -324,9 +324,10 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('图片地址:', data.secure_url);
             const url = data.secure_url;
             const recordList = document.getElementById('recordList');
-            recordList.innerHTML += `<div class="entry"><p><strong>${author}</strong> - ${date}</p><p>${text}</p><img src="${url}" alt="每日记录"></div>`;
+            recordList.insertAdjacentHTML('beforeend', `<div class="entry"><p><strong>${author}</strong> - ${date}</p><p>${text}</p><img src="${url}" alt="每日记录" loading="lazy" onerror="this.src='error.png'"> </div>`);
         })
         .catch(err => {
             console.error(err);
