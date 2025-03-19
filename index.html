@@ -93,48 +93,20 @@
         .photo-section img:hover {
             transform: scale(1.2);
         }
-        .cloud-upload {
-            text-align: center;
-            margin: 40px auto;
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 20px;
-        }
-        .cloud-upload input, .cloud-upload select, .cloud-upload textarea {
-            display: block;
-            width: 80%;
-            margin: 10px auto;
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-        }
-        .cloud-upload button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            border: none;
-            background-color: #ff6b81;
-            border-radius: 50px;
-            color: #fff;
-            cursor: pointer;
-        }
-        .cloud-upload button:hover {
-            background-color: #ff3b61;
-        }
         .record-list {
             text-align: center;
             margin: 30px;
         }
         .record-list .entry {
             background: rgba(255, 255, 255, 0.2);
-            margin: 10px;
+            margin: 20px;
             border-radius: 10px;
-            padding: 10px;
+            padding: 20px;
         }
-        .record-list img {
-            width: 150px;
-            margin: 10px;
+        .record-list .entry img {
+            width: 200px;
             border-radius: 10px;
+            margin-top: 10px;
         }
         footer {
             text-align: center;
@@ -201,17 +173,13 @@
     <img src="4.jpg" alt="photo4">
 </div>
 
-<div class="cloud-upload">
-    <h2>❤️ 每日记录上传（带文字+日期+发送者）</h2>
-    <input type="file" id="cloudUploadInput">
-    <input type="text" id="recordAuthor" placeholder="发送人">
-    <input type="datetime-local" id="recordDate">
-    <textarea id="recordText" placeholder="记录内容"></textarea>
-    <button onclick="uploadRecordWithDetails()">上传记录到云端</button>
-</div>
-
-<div class="record-list" id="recordList">
-    <h3>✨ 每日记录（来自云端） ✨</h3>
+<div class="record-list">
+    <h3>✨ 每日记录 ✨</h3>
+    <div class="entry">
+        <p>2025-03-19 宝宝很乖的背了书哦！坚持！！ 🎬</p>
+        <img src="81.jpg" alt="我的好乖宝">
+    </div>
+   
 </div>
 
 <footer>未来的每一天，我都想和你一起走过 ❤️</footer>
@@ -301,38 +269,6 @@
     function toggleMusicPlayer() {
         const musicPlayer = document.getElementById('musicPlayer');
         musicPlayer.classList.toggle('hidden');
-    }
-
-    function uploadRecordWithDetails() {
-        const file = document.getElementById('cloudUploadInput').files[0];
-        const author = document.getElementById('recordAuthor').value;
-        const date = document.getElementById('recordDate').value;
-        const text = document.getElementById('recordText').value;
-
-        if (!file || !author || !date || !text) {
-            alert('请填写完整信息并选择图片！');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'ml_default');
-
-        fetch('https://api.cloudinary.com/v1_1/dsjtiubwu/image/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('图片地址:', data.secure_url);
-            const url = data.secure_url;
-            const recordList = document.getElementById('recordList');
-            recordList.insertAdjacentHTML('beforeend', `<div class="entry"><p><strong>${author}</strong> - ${date}</p><p>${text}</p><img src="${url}" alt="每日记录" loading="lazy" onerror="this.src='error.png'"> </div>`);
-        })
-        .catch(err => {
-            console.error(err);
-            alert('上传失败，请重试');
-        });
     }
 </script>
 </body>
