@@ -131,9 +131,11 @@
     </style>
 </head>
 <body>
-<audio autoplay loop>
-    <source src="jiushiaini.mp3" type="audio/mpeg">
+<audio id="myAudio" autoplay loop>
+  <source src="jiushiaini.mp3" type="audio/mpeg">
+  您的浏览器不支持 audio 标签。
 </audio>
+
 <canvas id="starCanvas"></canvas>
 <header>
     <h1>亲爱的黄玉佳宝贝</h1>
@@ -152,9 +154,11 @@
 <div class="daily-records">
     <h2>每日记录</h2>
     <ul id="recordList">
-        <li>2024-04-01 一起看了第一部电影 🎬</li>
-        <li>2024-04-05 手牵手去公园散步 🌳</li>
-        <li>2024-04-10 第一次做饭给你吃 🍳</li>
+       <!--  
+<li>2024-04-01 一起看了第一部电影 🎬</li>
+<li>2024-04-05 手牵手去公园散步 🌳</li>
+<li>2024-04-10 第一次做饭给你吃 🍳</li>
+-->
     </ul>
     <form id="recordForm">
         <input type="date" id="recordDate" required>
