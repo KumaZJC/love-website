@@ -37,6 +37,28 @@
             gap: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 1000;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .floating-icon {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 107, 129, 0.8);
+            border-radius: 50%;
+            color: white;
+            font-size: 28px;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .music-player.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(-50px);
         }
         .music-player button {
             background-color: #ff6b81;
@@ -79,8 +101,13 @@
             border-radius: 20px;
             padding: 20px;
         }
-        .cloud-upload input[type="file"] {
-            margin-top: 10px;
+        .cloud-upload input, .cloud-upload select, .cloud-upload textarea {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
         }
         .cloud-upload button {
             margin-top: 10px;
@@ -97,6 +124,12 @@
         .record-list {
             text-align: center;
             margin: 30px;
+        }
+        .record-list .entry {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 10px;
+            border-radius: 10px;
+            padding: 10px;
         }
         .record-list img {
             width: 120px;
@@ -148,11 +181,12 @@
     </style>
 </head>
 <body>
-<div class="music-player">
+<div class="music-player" id="musicPlayer">
     <button onclick="playMusic()">播放</button>
     <button onclick="pauseMusic()">暂停</button>
     <input type="range" id="progressBar" value="0" min="0" max="100" step="1">
 </div>
+<div class="floating-icon" id="floatingIcon" onclick="toggleMusicPlayer()">🎵</div>
 <audio id="myAudio" src="jiushiaini.mp3"></audio>
 <canvas id="starCanvas"></canvas>
 <header>
@@ -168,9 +202,12 @@
 </div>
 
 <div class="cloud-upload">
-    <h2>❤️ 每日记录上传（云端保存）</h2>
+    <h2>❤️ 每日记录上传（带文字+日期+发送者）</h2>
     <input type="file" id="cloudUploadInput">
-    <button onclick="uploadToCloudinary()">上传到云端</button>
+    <input type="text" id="recordAuthor" placeholder="发送人">
+    <input type="datetime-local" id="recordDate">
+    <textarea id="recordText" placeholder="记录内容"></textarea>
+    <button onclick="uploadRecordWithDetails()">上传记录到云端</button>
 </div>
 
 <div class="record-list" id="recordList">
@@ -220,13 +257,11 @@
     draw();
 
     function playMusic() {
-        const audio = document.getElementById('myAudio');
-        audio.play();
+        document.getElementById('myAudio').play();
     }
 
     function pauseMusic() {
-        const audio = document.getElementById('myAudio');
-        audio.pause();
+        document.getElementById('myAudio').pause();
     }
 
     const audio = document.getElementById('myAudio');
@@ -250,10 +285,32 @@
         setTimeout(() => heart.remove(), 1000);
     });
 
-    function uploadToCloudinary() {
+    window.addEventListener('scroll', () => {
+        const musicPlayer = document.getElementById('musicPlayer');
+        const floatingIcon = document.getElementById('floatingIcon');
+
+        if (window.scrollY > 300) {
+            musicPlayer.classList.add('hidden');
+            floatingIcon.style.display = 'block';
+        } else {
+            musicPlayer.classList.remove('hidden');
+            floatingIcon.style.display = 'none';
+        }
+    });
+
+    function toggleMusicPlayer() {
+        const musicPlayer = document.getElementById('musicPlayer');
+        musicPlayer.classList.toggle('hidden');
+    }
+
+    function uploadRecordWithDetails() {
         const file = document.getElementById('cloudUploadInput').files[0];
-        if (!file) {
-            alert('请先选择图片！');
+        const author = document.getElementById('recordAuthor').value;
+        const date = document.getElementById('recordDate').value;
+        const text = document.getElementById('recordText').value;
+
+        if (!file || !author || !date || !text) {
+            alert('请填写完整信息并选择图片！');
             return;
         }
 
@@ -269,27 +326,13 @@
         .then(data => {
             const url = data.secure_url;
             const recordList = document.getElementById('recordList');
-            recordList.innerHTML += `<img src="${url}" alt="每日记录">`;
+            recordList.innerHTML += `<div class="entry"><p><strong>${author}</strong> - ${date}</p><p>${text}</p><img src="${url}" alt="每日记录"></div>`;
         })
         .catch(err => {
             console.error(err);
             alert('上传失败，请重试');
         });
     }
-
-    function loadExistingRecords() {
-        fetch('https://res.cloudinary.com/dsjtiubwu/image/list/ml_default.json')
-            .then(response => response.json())
-            .then(data => {
-                const recordList = document.getElementById('recordList');
-                data.resources.forEach(img => {
-                    recordList.innerHTML += `<img src="${img.secure_url}" alt="历史记录">`;
-                });
-            })
-            .catch(err => console.error('加载记录失败', err));
-    }
-
-    loadExistingRecords();
 </script>
 </body>
 </html>
